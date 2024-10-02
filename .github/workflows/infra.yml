@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terragrunt/stage/aws/backstage/core/vpc
+        working-directory: terragrunt/stage/aws/backstage/core
     steps:
         # Setup requirements
       - uses: actions/checkout@v3
@@ -28,12 +28,12 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
       - name: Prepare Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.3.5
-      - name: Setup Terragrunt v0.38.4
+          terraform_version: 1.3.7
+      - name: Setup Terragrunt v0.46.3
         run: |
-          sudo wget -q -O /bin/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v0.40.2/terragrunt_linux_amd64
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.46.3/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
         # Run TG
