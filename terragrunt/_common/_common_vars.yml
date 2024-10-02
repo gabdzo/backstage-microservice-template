@@ -1,0 +1,8 @@
+tags:
+  Name: 'backstage-showcase'
+  Environment: 'stage'
+
+env: 'stage'
+region: 'eu-central-1'
+account_id: '005669471820'
+project: 'backstage-showcase'
