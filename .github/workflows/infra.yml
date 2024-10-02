@@ -16,6 +16,11 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: infra
+      cancel-in-progress: true
+      
     defaults:
       run:
         working-directory: terragrunt/stage/aws/backstage/core
