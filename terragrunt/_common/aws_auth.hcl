@@ -31,13 +31,13 @@ locals {
 inputs = {
   manage_aws_auth_configmap = true
 
-  aws_auth_roles = [
-    {
-      rolearn  = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-      username = "role1"
-      groups   = ["system:masters"]
-    },
-  ]
+#   aws_auth_roles = [
+#     {
+#       rolearn  = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
+#       username = "role1"
+#       groups   = ["system:masters"]
+#     },
+#   ]
 
   aws_auth_users = [
     {
