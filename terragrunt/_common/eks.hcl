@@ -79,12 +79,39 @@ inputs = {
 
   access_entries = {
     # One access entry with a policy associated
-    example = {
-      kubernetes_groups = []
+    role = {
+      kubernetes_groups = ["system:masters"]
       principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-
       policy_associations = {
-        example = {
+        role = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+          access_scope = {
+            namespaces = ["default"]
+            type       = "namespace"
+          }
+        }
+      }
+    }
+    root = {
+      kubernetes_groups = ["system:masters"]
+      principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
+      user_name         = "root"
+      policy_associations = {
+        role = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+          access_scope = {
+            namespaces = ["default"]
+            type       = "namespace"
+          }
+        }
+      }
+    }
+    terraform = {
+      kubernetes_groups = ["system:masters"]
+      principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
+      user_name         = "terraform"
+      policy_associations = {
+        role = {
           policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
           access_scope = {
             namespaces = ["default"]
