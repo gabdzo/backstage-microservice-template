@@ -17,26 +17,26 @@ terraform {
 # Locals are named constants that are reusable within the configuration.
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
-    common_vars = yamldecode(file("${dirname(find_in_parent_folders())}/terragrunt/_common/_common_vars.yml"))
+  common_vars = yamldecode(file("${dirname(find_in_parent_folders())}/terragrunt/_common/_common_vars.yml"))
 
-    # Base network config
-    vpc_cidr = "10.0.0.0/16"
-    
-    public_subnets = [
-        "10.0.0.0/20",   # AZ1
-        "10.0.16.0/20",  # AZ2
-        "10.0.32.0/20"   # AZ3
-    ]
+  # Base network config
+  vpc_cidr = "10.0.0.0/16"
 
-    private_subnets = [
-        "10.0.48.0/20",  # AZ1
-        "10.0.64.0/20",  # AZ2
-        "10.0.80.0/20"   # AZ3
-    ]
-    azs             = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+  public_subnets = [
+    "10.0.0.0/20",  # AZ1
+    "10.0.16.0/20", # AZ2
+    "10.0.32.0/20"  # AZ3
+  ]
 
-    # Base source URL for the Terraform AWS VPC module
-    base_source_url = "tfr://registry.terraform.io/terraform-aws-modules/vpc/aws"
+  private_subnets = [
+    "10.0.48.0/20", # AZ1
+    "10.0.64.0/20", # AZ2
+    "10.0.80.0/20"  # AZ3
+  ]
+  azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+
+  # Base source URL for the Terraform AWS VPC module
+  base_source_url = "tfr://registry.terraform.io/terraform-aws-modules/vpc/aws"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -45,24 +45,24 @@ locals {
 # environments.
 # ---------------------------------------------------------------------------------------------------------------------
 inputs = {
-    cidr = local.vpc_cidr
-    public_subnets = local.public_subnets
-    private_subnets = local.private_subnets
-    azs = local.azs
+  cidr            = local.vpc_cidr
+  public_subnets  = local.public_subnets
+  private_subnets = local.private_subnets
+  azs             = local.azs
 
-    # NAT configuration
-    enable_nat_gateway = true
-    single_nat_gateway = true
+  # NAT configuration
+  enable_nat_gateway = true
+  single_nat_gateway = true
 
-    enable_vpn_gateway = true
+  enable_vpn_gateway = true
 
-    # DNS configuration
-    enable_dns_support = true
-    enable_dns_hostnames = true
-    
-    # Disable ClassicLink (legacy feature), might be removed?
-    enable_classiclink = false
-    enable_classiclink_dns_support = false
+  # DNS configuration
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 
-    tags = local.common_vars.tags
+  # Disable ClassicLink (legacy feature), might be removed?
+  enable_classiclink             = false
+  enable_classiclink_dns_support = false
+
+  tags = local.common_vars.tags
 }

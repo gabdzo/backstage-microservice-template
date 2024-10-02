@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# npm run lint
+# npm run format
+
+# Reminder to run formatting before final commit
+echo "\033[0;33mReminder: Please run '\033[0;34mterragrunt hclfmt\033[0;33m' before your final commit to ensure code is properly formatted.\033[0m"

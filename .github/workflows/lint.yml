@@ -1,0 +1,50 @@
+name: Lint and Format
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - feat/*
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '18'
+
+      # - name: Install Yarn Classic
+      #   run: npm install -g yarn@1
+
+      - name: Install Terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v0.40.2/terragrunt_linux_amd64
+          sudo chmod +x /bin/terragrunt
+
+      # - name: Install Backstage Dependencies
+      #   working-directory: backstage
+      #   run: yarn install
+
+      - name: Lint Terragrunt
+        working-directory: terragrunt
+        run: terragrunt hclfmt --terragrunt-check
+
+      # - name: Check Prettier
+      #   working-directory: backstage
+      #   run: yarn prettier:check
+
+      - name: Check for uncommitted changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Uncommitted changes found. Please run 'npm run format' locally and commit the changes."
+            exit 1
+          fi

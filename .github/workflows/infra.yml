@@ -20,6 +20,7 @@ jobs:
       run:
         working-directory: terragrunt/stage/aws/backstage/core/vpc
     steps:
+        # Setup requirements
       - uses: actions/checkout@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -35,15 +36,7 @@ jobs:
           sudo wget -q -O /bin/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v0.40.2/terragrunt_linux_amd64
           sudo chmod +x /bin/terragrunt
           terragrunt -v
-      - name: Cache Terraform and Terragrunt
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.terraform.d/plugin-cache
-            /bin/terragrunt
-          key: ${{ runner.os }}-terraform-terragrunt-${{ hashFiles('**/*.hcl') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-terragrunt-
+        # Run TG
       - name: Init
         run: terragrunt run-all init --terragrunt-non-interactive
       - name: Plan

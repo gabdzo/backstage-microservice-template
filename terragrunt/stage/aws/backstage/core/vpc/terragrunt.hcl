@@ -5,15 +5,15 @@
 
 # Include the root configuration for provider and backend settings -> tf.state
 include "root" {
-    path = find_in_parent_folders()
+  path = find_in_parent_folders()
 }
 
 # Include the common VPC module configuration
 include "vpc" {
-    path = "${dirname(find_in_parent_folders())}/terragrunt/_common/vpc.hcl"
+  path = "${dirname(find_in_parent_folders())}/terragrunt/_common/vpc.hcl"
 }
 
 # Include the common configuration, which contains shared variables and settings used across multiple modules
 include "common" {
-    path = "${dirname(find_in_parent_folders())}/terragrunt/_common/_common.hcl"
+  path = "${dirname(find_in_parent_folders())}/terragrunt/_common/_common.hcl"
 }
