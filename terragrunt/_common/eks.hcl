@@ -80,7 +80,7 @@ inputs = {
   access_entries = {
     # One access entry with a policy associated
     role = {
-      kubernetes_groups = ["system:masters"]
+      kubernetes_groups = ["masters"]
       principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
       policy_associations = {
         role = {
@@ -93,7 +93,7 @@ inputs = {
       }
     }
     root = {
-      kubernetes_groups = ["system:masters"]
+      kubernetes_groups = ["masters"]
       principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
       user_name         = "root"
       policy_associations = {
@@ -107,7 +107,7 @@ inputs = {
       }
     }
     terraform = {
-      kubernetes_groups = ["system:masters"]
+      kubernetes_groups = ["masters"]
       principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
       user_name         = "terraform"
       policy_associations = {
