@@ -77,50 +77,50 @@ inputs = {
   # To add the current caller identity as an administrator
   enable_cluster_creator_admin_permissions = true
 
-  access_entries = {
-    # One access entry with a policy associated
-    role = {
-      kubernetes_groups = ["masters"]
-      principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-      policy_associations = {
-        role = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-          access_scope = {
-            namespaces = ["default"]
-            type       = "namespace"
-          }
-        }
-      }
-    }
-    root = {
-      kubernetes_groups = ["masters"]
-      principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-      user_name         = "root"
-      policy_associations = {
-        role = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-          access_scope = {
-            namespaces = ["default"]
-            type       = "namespace"
-          }
-        }
-      }
-    }
-    terraform = {
-      kubernetes_groups = ["masters"]
-      principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-      user_name         = "terraform"
-      policy_associations = {
-        role = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-          access_scope = {
-            namespaces = ["default"]
-            type       = "namespace"
-          }
-        }
-      }
-    }
-  }
+  # access_entries = {
+  #   # One access entry with a policy associated
+  #   role = {
+  #     kubernetes_groups = ["masters"]
+  #     principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
+  #     policy_associations = {
+  #       role = {
+  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  #         access_scope = {
+  #           namespaces = ["default"]
+  #           type       = "namespace"
+  #         }
+  #       }
+  #     }
+  #   }
+  #   root = {
+  #     kubernetes_groups = ["masters"]
+  #     principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
+  #     user_name         = "root"
+  #     policy_associations = {
+  #       role = {
+  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  #         access_scope = {
+  #           namespaces = ["default"]
+  #           type       = "namespace"
+  #         }
+  #       }
+  #     }
+  #   }
+  #   terraform = {
+  #     kubernetes_groups = ["masters"]
+  #     principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
+  #     user_name         = "terraform"
+  #     policy_associations = {
+  #       role = {
+  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  #         access_scope = {
+  #           namespaces = ["default"]
+  #           type       = "namespace"
+  #         }
+  #       }
+  #     }
+  #   }
+  # }
 
   tags = local.common_vars.tags
 }
