@@ -45,7 +45,10 @@ jobs:
       - name: Init
         run: terragrunt run-all init --terragrunt-non-interactive
       - name: Plan
+        # Skip plan for MAIN
+        if: github.event_name == 'push' && github.ref != 'refs/heads/main'
         run: terragrunt run-all plan --terragrunt-non-interactive
       - name: Apply
+        # Apply only for MAIN
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terragrunt run-all apply --terragrunt-non-interactive

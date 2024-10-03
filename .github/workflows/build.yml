@@ -30,7 +30,7 @@ jobs:
         with:
           context: backstage/Dockerfile
           push: true
-          tags: 005669471820.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/test123:latest
+          tags: 005669471820.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/showcase:latest
 
       - name: Image digest
         run: echo ${{ steps.build-and-push.outputs.digest }}
