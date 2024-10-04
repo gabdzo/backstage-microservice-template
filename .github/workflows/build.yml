@@ -28,6 +28,14 @@ jobs:
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Yarn Classic
+        run: npm install -g yarn@1
 
       - name: Get commit hash
         id: get-commit-hash
@@ -36,12 +44,21 @@ jobs:
         id: get-timestamp
         run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
 
+      - name: Run yarn install
+        working-directory: backstage
+        run: |
+            yarn install --immutable
+            yarn tsc
+            yarn build:backend --config ../../app-config.yaml --config ../../app-config.production.yaml
+
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
+        working-directory: backstage
         env:
-          ECR_REGISTRY: 005669471820.dkr.ecr.eu-central-1.amazonaws.com
-          ECR_REPOSITORY: showcase
-          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+            ECR_REGISTRY: 005669471820.dkr.ecr.eu-central-1.amazonaws.com
+            ECR_REPOSITORY: showcase
+            IMAGE_TAG: backstage-${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./backstage
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            docker image build . -f packages/backend/Dockerfile --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    
