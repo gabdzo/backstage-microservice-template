@@ -1,7 +1,0 @@
-tags:
-  Name: 'trust-backstage'
-
-env: 'dev'
-region: 'eu-central-1'
-account_id: 972916022359
-aws_profile: 'trust-test'

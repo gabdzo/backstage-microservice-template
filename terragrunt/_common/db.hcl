@@ -19,7 +19,7 @@ terraform {
 locals {
   common_vars = yamldecode(file("${dirname(find_in_parent_folders())}/terragrunt/_common/_common_vars.yml"))
   # Base source URL for the Terraform AWS ECR module
-  base_source_url = "${dirname(find_in_parent_folders())}/terraform"
+  base_source_url = "${dirname(find_in_parent_folders())}/terraform/data"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

@@ -17,6 +17,10 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    concurrency:
+        group: build
+        cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
