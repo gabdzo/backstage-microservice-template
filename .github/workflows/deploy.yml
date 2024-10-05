@@ -1,4 +1,4 @@
-name: Deploy infrastructure
+name: Setup EKS Kubeconfig
 
 on:
   push:
@@ -10,28 +10,41 @@ on:
 
 # Set permissions for OpenID connect
 permissions:
-  id-token: write # This is required for requesting the JWT
-  contents: read  # This is required for actions/checkout
-
+    id-token: write # This is required for requesting the JWT
+    contents: read  # This is required for actions/checkout
+          
 jobs:
-  deploy:
+  setup-eks:
     runs-on: ubuntu-latest
 
     concurrency:
-      group: infra
-      cancel-in-progress: true
-      
-    defaults:
-      run:
-        working-directory: terragrunt/stage/aws/backstage/core
+        group: deploy
+        cancel-in-progress: true
+
     steps:
-        # Setup requirements
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - id: install-aws-cli
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+            version: 2                         # default
+            verbose: false                     # default
+            arch: amd64   
+
+      - name: Download EKS Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name showcase --region ${{ secrets.AWS_REGION }}
+
+      - name: Verify Kubeconfig
+        run: kubectl get svc
+
       - name: Prepare Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -43,11 +56,14 @@ jobs:
           terragrunt -v
         # Run TG
       - name: Init
+        working-directory: terragrunt/stage/aws/backstage/data
         run: terragrunt run-all init --terragrunt-non-interactive
       - name: Plan
         # Skip plan for MAIN
+        working-directory: terragrunt/stage/aws/backstage/data 
         run: terragrunt run-all plan --terragrunt-non-interactive
       - name: Apply
         # Apply only for MAIN
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: terragrunt/stage/aws/backstage/data
         run: terragrunt run-all apply --terragrunt-non-interactive

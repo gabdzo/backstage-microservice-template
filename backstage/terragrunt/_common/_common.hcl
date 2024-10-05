@@ -1,4 +1,0 @@
-inputs = {
-    name = "test"
-    
-}
