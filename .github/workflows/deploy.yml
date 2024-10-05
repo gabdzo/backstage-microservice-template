@@ -60,7 +60,6 @@ jobs:
         run: terragrunt run-all init --terragrunt-non-interactive
       - name: Plan
         # Skip plan for MAIN
-        if: github.event_name == 'push' && github.ref != 'refs/heads/main'
         working-directory: terragrunt/stage/aws/backstage/data 
         run: terragrunt run-all plan --terragrunt-non-interactive
       - name: Apply

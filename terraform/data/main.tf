@@ -140,3 +140,20 @@ resource "kubernetes_deployment" "postgres" {
     }
   }
 }
+
+resource "kubernetes_service" "postgres" {
+  metadata {
+    name      = "postgres"
+    namespace = "backstage"
+  }
+
+  spec {
+    selector = {
+      app = "postgres"
+    }
+
+    port {
+      port = 5432
+    }
+  }
+}
