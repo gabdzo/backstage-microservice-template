@@ -1,0 +1,42 @@
+name: Setup EKS Kubeconfig
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Set permissions for OpenID connect
+permissions:
+    id-token: write # This is required for requesting the JWT
+    contents: read  # This is required for actions/checkout
+          
+jobs:
+  setup-eks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - id: install-aws-cli
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+            version: 2                         # default
+            verbose: false                     # default
+            arch: amd64   
+
+      - name: Download EKS Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name showcase --region ${{ secrets.AWS_REGION }}
+
+      - name: Verify Kubeconfig
+        run: kubectl get svc
