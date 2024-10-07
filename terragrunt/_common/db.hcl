@@ -24,6 +24,8 @@ locals {
 
 dependency "addons" {
   config_path = "${dirname(find_in_parent_folders())}/terragrunt/${local.common_vars.env}/aws/backstage/addons/eks_addons"
+
+  skip_outputs = true
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

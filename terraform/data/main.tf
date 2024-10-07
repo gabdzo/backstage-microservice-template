@@ -44,83 +44,89 @@ resource "kubernetes_persistent_volume_claim" "postgres_storage_claim" {
     }
   }
 }
-
-resource "kubernetes_deployment" "postgres" {
-  metadata {
-    name      = "postgres"
-    namespace = var.namespace
-    labels = {
-      app = "postgres"
-    }
-  }
-
-  spec {
-    replicas = 1
-
-    selector {
-      match_labels = {
+resource "kubernetes_manifest" "postgres_deployment" {
+  manifest = {
+    apiVersion = "apps/v1"
+    kind       = "Deployment"
+    metadata = {
+      name      = "postgres"
+      namespace = var.namespace
+      labels = {
         app = "postgres"
       }
     }
-
-    template {
-      metadata {
-        labels = {
+    spec = {
+      replicas = 1
+      selector = {
+        matchLabels = {
           app = "postgres"
         }
       }
-
-      spec {
-        serviceAccountName = "my-service-account"
-        containers {
-          name  = "postgres"
-          image = "postgres:latest"
-
-          env {
-            name = "POSTGRES_USER"
-            valueFrom {
-              secretKeyRef {
-                name = "backstage-secrets"
-                key  = "username"
-              }
-            }
-          }
-
-          env {
-            name = "POSTGRES_PASSWORD"
-            valueFrom {
-              secretKeyRef {
-                name = "backstage-secrets"
-                key  = "password"
-              }
-            }
-          }
-
-          ports {
-            container_port = 5432
-          }
-
-          volumeMounts {
-            name      = "secrets-store-inline"
-            mountPath = "/mnt/secrets-store"
-            readOnly  = true
+      template = {
+        metadata = {
+          labels = {
+            app = "postgres"
           }
         }
-
-        volumes {
-          name = "secrets-store-inline"
-          csi {
-            driver            = "secrets-store.csi.k8s.io"
-            readOnly          = true
-            volumeAttributes = {
-              secretProviderClass = "ssm-parameter-store"
+        spec = {
+          serviceAccountName = "backstage"
+          containers = [
+            {
+              name  = "postgres"
+              image = "postgres:latest"
+              imagePullPolicy = "Always"
+              env = [
+                {
+                  name = "POSTGRES_USER"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "username"
+                    }
+                  }
+                },
+                {
+                  name = "POSTGRES_PASSWORD"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "password"
+                    }
+                  }
+                }
+              ]
+              ports = [
+                {
+                  containerPort = 5432
+                }
+              ]
+              volumeMounts = [
+                {
+                  name      = "secrets-store-inline"
+                  mountPath = "/mnt/secrets-store"
+                  readOnly  = true
+                }
+              ]
             }
-          }
+          ]
+          volumes = [
+            {
+              name = "secrets-store-inline"
+              csi = {
+                driver            = "secrets-store.csi.k8s.io"
+                readOnly          = true
+                volumeAttributes = {
+                  secretProviderClass = "ssm-parameter-store"
+                }
+              }
+            }
+          ]
         }
       }
     }
   }
 }
+
 resource "kubernetes_service" "postgres" {
   metadata {
     name      = "postgres"

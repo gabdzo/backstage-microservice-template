@@ -24,6 +24,8 @@ locals {
 
 dependency "data" {
   config_path = "${dirname(find_in_parent_folders())}/terragrunt/${local.common_vars.env}/aws/backstage/data/pgsql"
+
+  skip_outputs = true
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
