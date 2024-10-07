@@ -71,3 +71,16 @@ resource "kubernetes_service_account" "backstage" {
     }
   }
 }
+
+resource "kubernetes_secret" "backstage" {
+  metadata {
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.backstage.metadata.0.name
+    }
+
+    generate_name = "backstage-"
+  }
+
+  type                           = "kubernetes.io/service-account-token"
+  wait_for_service_account_token = true
+}
