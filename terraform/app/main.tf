@@ -1,69 +1,90 @@
-resource "kubernetes_secret" "backstage_secrets" {
-  metadata {
-    name      = "backstage-secrets"
-    namespace = "backstage"
-  }
 
-  data = {
-    GITHUB_TOKEN = "VG9rZW5Ub2tlblRva2VuVG9rZW5NYWxrb3ZpY2hUb2tlbg=="
-  }
-
-  type = "Opaque"
-}
-
-resource "kubernetes_deployment" "backstage" {
-  metadata {
-    name      = "backstage"
-    namespace = "backstage"
-    labels = {
-      app = "backstage"
-    }
-  }
-
-  spec {
-    replicas = 1
-
-    selector {
-      match_labels = {
+resource "kubernetes_manifest" "backstage_deployment" {
+  manifest = {
+    apiVersion = "apps/v1"
+    kind       = "Deployment"
+    metadata = {
+      name      = "backstage"
+      namespace = var.namespace
+      labels = {
         app = "backstage"
       }
     }
-
-    template {
-      metadata {
-        labels = {
+    spec = {
+      replicas = 1
+      selector = {
+        matchLabels = {
           app = "backstage"
         }
       }
-
-      spec {
-        container {
-          name  = "backstage"
-          image = "backstage:latest"
-
-          port {
-            container_port = 7007
+      template = {
+        metadata = {
+          labels = {
+            app = "backstage"
           }
-
-          liveness_probe {
-            http_get {
-              path = "/healthcheck"
-              port = 7007
+        }
+        spec = {
+          serviceAccountName = "backstage"
+          containers = [
+            {
+              name  = "backstage"
+              image = "backstage:latest"
+              imagePullPolicy = "Always"
+              env = [
+                {
+                  name = "GH_CLIENT_ID"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "GH_CLIENT_ID"
+                    }
+                  }
+                },
+                {
+                  name = "GH_CLIENT_SECRET"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "GH_CLIENT_SECRET"
+                    }
+                  }
+                },
+                {
+                  name = "GH_TOKEN"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "GH_TOKEN"
+                    }
+                  }
+                }
+              ]
+              ports = [
+                {
+                  containerPort = 7007
+                }
+              ]
+              volumeMounts = [
+                {
+                  name      = "secrets-store-inline"
+                  mountPath = "/mnt/secrets-store"
+                  readOnly  = true
+                }
+              ]
             }
-
-            initial_delay_seconds = 3
-            period_seconds        = 3
-          }
-
-          readiness_probe {
-            http_get {
-              path = "/healthcheck"
-              port = 7007
+          ]
+          volumes = [
+            {
+              name = "secrets-store-inline"
+              csi = {
+                driver            = "secrets-store.csi.k8s.io"
+                readOnly          = true
+                volumeAttributes = {
+                  secretProviderClass = "ssm-parameter-store"
+                }
+              }
             }
-
-            initial_delay_seconds = 3
-            period_seconds        = 3
-          }
+          ]
         }
       }
     }
@@ -88,3 +109,5 @@ resource "kubernetes_service" "backstage" {
     }
   }
 }
+
+
