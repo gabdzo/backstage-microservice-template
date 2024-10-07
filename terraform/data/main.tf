@@ -4,20 +4,6 @@ resource "kubernetes_namespace" "backstage" {
   }
 }
 
-resource "kubernetes_secret" "example" {
-  metadata {
-    name = "postgres-secrets"
-    namespace = var.namespace
-  }
-
-  data = {
-    username = "admin"
-    password = "P4ssw0rd"
-  }
-
-  type = "kubernetes.io/basic-auth"
-}
-
 resource "kubernetes_persistent_volume" "postgres_storage" {
   metadata {
     name = "postgres-storage"
@@ -62,7 +48,7 @@ resource "kubernetes_persistent_volume_claim" "postgres_storage_claim" {
 resource "kubernetes_deployment" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = "backstage"
+    namespace = var.namespace
     labels = {
       app = "postgres"
     }
@@ -85,62 +71,56 @@ resource "kubernetes_deployment" "postgres" {
       }
 
       spec {
-        container {
+        serviceAccountName = "my-service-account"
+        containers {
           name  = "postgres"
           image = "postgres:latest"
 
-          port {
+          env {
+            name = "POSTGRES_USER"
+            valueFrom {
+              secretKeyRef {
+                name = "backstage-secrets"
+                key  = "username"
+              }
+            }
+          }
+
+          env {
+            name = "POSTGRES_PASSWORD"
+            valueFrom {
+              secretKeyRef {
+                name = "backstage-secrets"
+                key  = "password"
+              }
+            }
+          }
+
+          ports {
             container_port = 5432
           }
 
-          env {
-            name  = "POSTGRES_DB"
-            value = "mydatabase"
-          }
-
-          env {
-            name  = "POSTGRES_USER"
-            value = "myuser"
-          }
-
-          env {
-            name  = "POSTGRES_PASSWORD"
-            value = "mypassword"
-          }
-
-          volume_mount {
-            name       = "postgres-storage"
-            mount_path = "/var/lib/postgresql/data"
-          }
-
-          liveness_probe {
-            http_get {
-              path = "/"
-              port = 80
-
-              http_header {
-                name  = "X-Custom-Header"
-                value = "Awesome"
-              }
-            }
-
-            initial_delay_seconds = 3
-            period_seconds        = 3
+          volumeMounts {
+            name      = "secrets-store-inline"
+            mountPath = "/mnt/secrets-store"
+            readOnly  = true
           }
         }
 
-        volume {
-          name = "postgres-storage"
-
-          persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.postgres_storage_claim.metadata[0].name
+        volumes {
+          name = "secrets-store-inline"
+          csi {
+            driver            = "secrets-store.csi.k8s.io"
+            readOnly          = true
+            volumeAttributes = {
+              secretProviderClass = "ssm-parameter-store"
+            }
           }
         }
       }
     }
   }
 }
-
 resource "kubernetes_service" "postgres" {
   metadata {
     name      = "postgres"

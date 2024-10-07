@@ -1,20 +1,9 @@
-resource "kubernetes_secret" "backstage_secrets" {
-  metadata {
-    name      = "backstage-secrets"
-    namespace = "backstage"
-  }
 
-  data = {
-    GITHUB_TOKEN = "VG9rZW5Ub2tlblRva2VuVG9rZW5NYWxrb3ZpY2hUb2tlbg=="
-  }
-
-  type = "Opaque"
-}
 
 resource "kubernetes_deployment" "backstage" {
   metadata {
     name      = "backstage"
-    namespace = "backstage"
+    namespace = var.namespace
     labels = {
       app = "backstage"
     }
@@ -37,32 +26,69 @@ resource "kubernetes_deployment" "backstage" {
       }
 
       spec {
-        container {
+        serviceAccountName = "my-service-account"
+        containers {
           name  = "backstage"
           image = "backstage:latest"
 
-          port {
+          env {
+            name = "GH_CLIENT_ID"
+            valueFrom {
+              secretKeyRef {
+                name = "backstage-secrets"
+                key  = "GH_CLIENT_ID"
+              }
+            }
+          }
+
+          env {
+            name = "GH_CLIENT_SECRET"
+            valueFrom {
+              secretKeyRef {
+                name = "backstage-secrets"
+                key  = "GH_CLIENT_SECRET"
+              }
+            }
+          }
+
+          env {
+            name = "GH_TOKEN"
+            valueFrom {
+              secretKeyRef {
+                name = "backstage-secrets"
+                key  = "GH_TOKEN"
+              }
+            }
+          }
+
+          ports {
             container_port = 7007
           }
 
           liveness_probe {
             http_get {
-              path = "/healthcheck"
+              path = "/health"
               port = 7007
             }
-
-            initial_delay_seconds = 3
-            period_seconds        = 3
+            initial_delay_seconds = 30
+            period_seconds        = 10
           }
 
-          readiness_probe {
-            http_get {
-              path = "/healthcheck"
-              port = 7007
-            }
+          volumeMounts {
+            name      = "secrets-store-inline"
+            mountPath = "/mnt/secrets-store"
+            readOnly  = true
+          }
+        }
 
-            initial_delay_seconds = 3
-            period_seconds        = 3
+        volumes {
+          name = "secrets-store-inline"
+          csi {
+            driver            = "secrets-store.csi.k8s.io"
+            readOnly          = true
+            volumeAttributes = {
+              secretProviderClass = "ssm-parameter-store"
+            }
           }
         }
       }
@@ -88,3 +114,5 @@ resource "kubernetes_service" "backstage" {
     }
   }
 }
+
+

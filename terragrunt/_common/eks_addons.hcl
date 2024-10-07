@@ -18,12 +18,13 @@ terraform {
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
   common_vars = yamldecode(file("${dirname(find_in_parent_folders())}/terragrunt/_common/_common_vars.yml"))
-  # Base source URL for the Terraform AWS ECR module
-  base_source_url = "${dirname(find_in_parent_folders())}/terraform/data"
+
+  base_source_url = "${dirname(find_in_parent_folders())}/terraform/addons"
+
 }
 
-dependency "addons" {
-  config_path = "${dirname(find_in_parent_folders())}/terragrunt/${local.common_vars.env}/aws/backstage/addons/eks_addons"
+dependency "core" {
+  config_path = "${dirname(find_in_parent_folders())}/terragrunt/${local.common_vars.env}/aws/backstage/core/eks"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -32,7 +33,8 @@ dependency "addons" {
 # environments.
 # ---------------------------------------------------------------------------------------------------------------------
 inputs = {
-  name = "showcase"
+  namespace       = "backstage"
+  deployment_role = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
 
   tags = local.common_vars.tags
 }
