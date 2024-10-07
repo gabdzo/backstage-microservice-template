@@ -17,8 +17,8 @@ backend:
   database:
     client: pg
     connection:
-      host: ${POSTGRES_HOST}
-      port: ${POSTGRES_PORT}
+      host: 'postgres'
+      port: '5432'
       user: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
       # https://node-postgres.com/features/ssl
@@ -27,6 +27,14 @@ backend:
       # ssl:
       #   ca: # if you have a CA file and want to verify it you can uncomment this section
       #     $file: <file-path>/ca/server.crt
+
+auth:
+  # see https://backstage.io/docs/auth/ to learn about auth providers
+  providers:
+    github:
+      production:
+        clientId: ${GITHUB_CLIENT_ID}
+        clientSecret: ${GITHUB_CLIENT_SECRET}
 
 catalog:
   # Overrides the default list locations from app-config.yaml as these contain example data.

@@ -28,7 +28,7 @@ resource "kubernetes_manifest" "backstage_deployment" {
           containers = [
             {
               name  = "backstage"
-              image = "backstage:latest"
+              image = "005669471820.dkr.ecr.eu-central-1.amazonaws.com/showcase:backstage-a6b6635-2024-10-07-23-28"
               imagePullPolicy = "Always"
               env = [
                 {
@@ -57,6 +57,24 @@ resource "kubernetes_manifest" "backstage_deployment" {
                       key  = "GH_TOKEN"
                     }
                   }
+                },
+                {
+                  name = "POSTGRES_USER"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "POSTGRES_USER"
+                    }
+                  }
+                },
+                {
+                  name = "POSTGRES_PASSWORD"
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "backstage-secrets"
+                      key  = "POSTGRES_PASSWORD"
+                    }
+                  }
                 }
               ]
               ports = [
@@ -80,7 +98,7 @@ resource "kubernetes_manifest" "backstage_deployment" {
                 driver            = "secrets-store.csi.k8s.io"
                 readOnly          = true
                 volumeAttributes = {
-                  secretProviderClass = "ssm-parameter-store"
+                  secretProviderClass = "backstage-secrets"
                 }
               }
             }
