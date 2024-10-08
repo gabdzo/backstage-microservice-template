@@ -28,7 +28,7 @@ resource "kubernetes_manifest" "backstage_deployment" {
           containers = [
             {
               name  = "backstage"
-              image = "005669471820.dkr.ecr.eu-central-1.amazonaws.com/showcase:backstage-a6b6635-2024-10-07-23-28"
+              image = var.backstage_image
               imagePullPolicy = "Always"
               env = [
                 {
