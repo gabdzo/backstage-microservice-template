@@ -82,17 +82,17 @@ resource "kubernetes_manifest" "secret_provider_class" {
   }
 }
 
-resource "kubernetes_service_account" "backstage" {
-  metadata {
-    name      = "backstage"
-    namespace = var.namespace
-    annotations = {
-      "eks.amazonaws.com/role-arn" = var.deployment_role
-    }
-  }
+# resource "kubernetes_service_account" "backstage" {
+#   metadata {
+#     name      = "backstage"
+#     namespace = var.namespace
+#     annotations = {
+#       "eks.amazonaws.com/role-arn" = var.deployment_role
+#     }
+#   }
 
-  depends_on = [kubernetes_namespace.backstage]
-}
+#   depends_on = [kubernetes_namespace.backstage]
+# }
 
 # resource "kubernetes_secret" "backstage" {
 #   metadata {
