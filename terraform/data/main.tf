@@ -1,8 +1,3 @@
-resource "kubernetes_namespace" "backstage" {
-  metadata {
-    name = var.namespace
-  }
-}
 
 resource "kubernetes_persistent_volume" "postgres_storage" {
   metadata {
@@ -81,7 +76,7 @@ resource "kubernetes_manifest" "postgres_deployment" {
                   valueFrom = {
                     secretKeyRef = {
                       name = "backstage-secrets"
-                      key  = "username"
+                      key  = "POSTGRES_USER"
                     }
                   }
                 },
@@ -90,7 +85,7 @@ resource "kubernetes_manifest" "postgres_deployment" {
                   valueFrom = {
                     secretKeyRef = {
                       name = "backstage-secrets"
-                      key  = "password"
+                      key  = "POSTGRES_PASSWORD"
                     }
                   }
                 }
@@ -116,7 +111,7 @@ resource "kubernetes_manifest" "postgres_deployment" {
                 driver            = "secrets-store.csi.k8s.io"
                 readOnly          = true
                 volumeAttributes = {
-                  secretProviderClass = "ssm-parameter-store"
+                  secretProviderClass = "backstage-secrets"
                 }
               }
             }

@@ -1,12 +1,12 @@
 name: Deploy infrastructure
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        type: string
 
 # Set permissions for OpenID connect
 permissions:
@@ -16,6 +16,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
 
     concurrency:
       group: infra
@@ -52,6 +53,23 @@ jobs:
         run: |
           aws eks update-kubeconfig --name showcase --region ${{ secrets.AWS_REGION }}
   
+
+      - name: Download image URI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image-uri
+          path: terragrunt/stage/aws/backstage/
+        
+      # - name: Extract artifact
+      #   run: unzip image-uri.zip
+  
+      - name: List files in current directory
+        run: ls -alt
+
+      - name: Read image URI
+        id: read-image-uri
+        run: echo "TF_VAR_backstage_image=$(cat image-uri.txt)" >> $GITHUB_ENV
+
         # Run TG
       - name: Init
         run: terragrunt run-all init --terragrunt-non-interactive

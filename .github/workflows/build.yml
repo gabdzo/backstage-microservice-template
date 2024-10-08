@@ -1,12 +1,13 @@
 name: Build and Push Docker Image to ECR
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        type: string
+           
 
 # Set permissions for OpenID connect
 permissions:
@@ -16,6 +17,7 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.env }}
 
     concurrency:
         group: build
@@ -23,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -40,29 +42,53 @@ jobs:
 
       - name: Install Yarn Classic
         run: npm install -g yarn@1
+      
+      - name: Get timestamp & commit
+        id: create-image-uid
+        run: |
+            echo "timestamp=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+            echo "commit-hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Get commit hash
-        id: get-commit-hash
-        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
-      - name: Get timestamp
-        id: get-timestamp
-        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
+      - name: Cache Yarn dependencies
+        id: yarn-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            **/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-  
 
       - name: Run yarn install
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         working-directory: backstage
         run: |
             yarn install --immutable
+
+      - name: Build backend
+        working-directory: backstage
+        run: |
             yarn tsc
             yarn build:backend --config ../../app-config.yaml --config ../../app-config.production.yaml
-
+        
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         working-directory: backstage
         env:
             ECR_REGISTRY: 005669471820.dkr.ecr.eu-central-1.amazonaws.com
             ECR_REPOSITORY: showcase
-            IMAGE_TAG: backstage-${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+            IMAGE_TAG: backstage-${{ steps.create-image-uid.outputs.commit-hash }}-${{ steps.create-image-uid.outputs.timestamp }}
         run: |
             docker image build . -f packages/backend/Dockerfile --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
     
+      - name: Create image URI file
+        run: echo $IMAGE_URI > image-uri.txt
+
+      - name: Upload image URI artifact
+        uses: actions/upload-artifact@v4
+        with:
+            name: image-uri
+            path: image-uri.txt
