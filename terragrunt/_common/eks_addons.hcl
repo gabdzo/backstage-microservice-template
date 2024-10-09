@@ -25,6 +25,8 @@ locals {
 
 dependency "core" {
   config_path = "${dirname(find_in_parent_folders())}/terragrunt/${local.common_vars.env}/aws/backstage/core/eks"
+
+  skip_outputs = true
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
