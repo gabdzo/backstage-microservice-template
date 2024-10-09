@@ -125,7 +125,7 @@ class KubernetesApp(pulumi.ComponentResource):
             f"{name}-service",
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 namespace=namespace,
-                name=f"{name}-service",
+                name=name,
             ),
             spec=k8s.core.v1.ServiceSpecArgs(
                 selector={"app": name},
