@@ -223,6 +223,7 @@ backstage_app = KubernetesApp(
     container_port=7007,
     replicas=1,
     secret_name="backstage-secrets",  # Secret for environment variables
+    secret_provider_class_name="backstage-secrets", # Secret for environment variables
     env_vars={
         "GH_CLIENT_ID": "GH_CLIENT_ID",
         "GH_CLIENT_SECRET": "GH_CLIENT_SECRET",
