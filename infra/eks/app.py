@@ -9,6 +9,7 @@ class KubernetesApp(pulumi.ComponentResource):
         namespace: str,
         image: str,
         container_port: int,
+        service_port: int,
         replicas: int = 1,
         secret_name: str = None,  # Kubernetes secret name for environment variables
         env_vars: dict = None,  # Environment variables to map from secret
@@ -134,7 +135,7 @@ class KubernetesApp(pulumi.ComponentResource):
                 selector={"app": name},
                 ports=[
                     k8s.core.v1.ServicePortArgs(
-                        port=80,
+                        port=service_port,
                         target_port=container_port,
                     )
                 ],
