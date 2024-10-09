@@ -26,3 +26,10 @@ jobs:
         secrets: inherit
         with:
           env: stage
+
+    app:
+        needs: infra
+        uses: ./.github/workflows/deploy_pulumi.yml
+        secrets: inherit
+        with:
+          env: stage

@@ -24,7 +24,7 @@ jobs:
       
     defaults:
       run:
-        working-directory: terragrunt/stage/aws/backstage
+        working-directory: terragrunt/stage/aws/backstage/core
     steps:
         # Setup requirements
       - uses: actions/checkout@v3

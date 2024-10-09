@@ -1,15 +1,15 @@
-resource "kubernetes_namespace" "backstage" {
-  metadata {
-    name = var.namespace
-  }
-}
+# resource "kubernetes_namespace" "backstage" {
+#   metadata {
+#     name = var.namespace
+#   }
+# }
 
 resource "helm_release" "secrets-store-csi-driver" {
   name       = "secrets-store-csi-driver"
   repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
   chart      = "secrets-store-csi-driver"
   version    = "1.4.5"
-  namespace  = "kube-system"
+  namespace  = "backstage"
   timeout    = 10 * 60
 
   values = [
@@ -20,6 +20,35 @@ VALUES
   ]
 }
 
+# resource "helm_release" "aws_load_balancer_controller" {
+#   name       = "aws-load-balancer-controller"
+#   repository = "https://aws.github.io/eks-charts"
+#   chart      = "aws-load-balancer-controller"
+#   version    = "1.9.0"  # Replace with the desired version
+#   namespace  = "backstage"
+#   timeout    = 10 * 60
+
+#   values = [
+#     <<VALUES
+#     replicaCount: 1
+# VALUES
+#   ]
+
+#   set {
+#     name  = "clusterName"
+#     value = "showcase"  # Replace with your cluster name variable
+#   }
+
+#   set {
+#     name  = "serviceAccount.create"
+#     value = "false"
+#   }
+
+#   set {
+#     name  = "serviceAccount.name"
+#     value = "backstage"
+#   }
+# }
 
 resource "kubernetes_manifest" "secret_provider_class" {
   manifest = {
