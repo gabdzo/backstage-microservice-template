@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_kubernetes as k8s
 
+
 class KubernetesApp(pulumi.ComponentResource):
     def __init__(
         self,
@@ -19,9 +20,9 @@ class KubernetesApp(pulumi.ComponentResource):
         ingress_enabled: bool = False,  # Whether to create ingress for the app
         path: str = "/",  # Ingress path
         secret_provider_class_name: str = "backstage-secrets",  # SecretProviderClass name
-        opts: pulumi.ResourceOptions = None
+        opts: pulumi.ResourceOptions = None,
     ):
-        super().__init__('my:k8s:KubernetesApp', name, {}, opts)
+        super().__init__("my:k8s:KubernetesApp", name, {}, opts)
 
         # Step 1: Configure volumes if PVC is provided
         volume_mounts = []
@@ -54,8 +55,8 @@ class KubernetesApp(pulumi.ComponentResource):
                     read_only=True,
                     volume_attributes={
                         "secretProviderClass": secret_provider_class_name
-                    }
-                )
+                    },
+                ),
             )
         )
 
@@ -79,7 +80,7 @@ class KubernetesApp(pulumi.ComponentResource):
                                 name=secret_name,
                                 key=key,
                             )
-                        )
+                        ),
                     )
                 )
 
@@ -117,7 +118,9 @@ class KubernetesApp(pulumi.ComponentResource):
                     ),
                 ),
             ),
-            opts=pulumi.ResourceOptions(parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")),
+            opts=pulumi.ResourceOptions(
+                parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")
+            ),
         )
 
         # Step 5: Create the Kubernetes Service
@@ -137,16 +140,20 @@ class KubernetesApp(pulumi.ComponentResource):
                 ],
                 type=service_type,  # ClusterIP, LoadBalancer, etc.
             ),
-            opts=pulumi.ResourceOptions(parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")),
+            opts=pulumi.ResourceOptions(
+                parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")
+            ),
         )
 
         # Step 6: Optionally create an Ingress
         if ingress_enabled:
             ingress_annotations = ingress_annotations or {}
-            ingress_annotations.update({
-                "alb.ingress.kubernetes.io/subnets": ingress_subnets,
-                "alb.ingress.kubernetes.io/security-groups": ingress_security_groups,
-            })
+            ingress_annotations.update(
+                {
+                    "alb.ingress.kubernetes.io/subnets": ingress_subnets,
+                    "alb.ingress.kubernetes.io/security-groups": ingress_security_groups,
+                }
+            )
             self.ingress = k8s.networking.v1.Ingress(
                 f"{name}-ingress",
                 metadata=k8s.meta.v1.ObjectMetaArgs(
@@ -176,7 +183,9 @@ class KubernetesApp(pulumi.ComponentResource):
                         )
                     ],
                 ),
-                opts=pulumi.ResourceOptions(parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")),
+                opts=pulumi.ResourceOptions(
+                    parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")
+                ),
             )
 
         self.register_outputs({})

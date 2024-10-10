@@ -1,4 +1,4 @@
-name: Deploy Pulumi
+name: Deploy EKS apps
 
 on:
     workflow_call:
@@ -27,33 +27,27 @@ jobs:
         working-directory: infra
 
     steps:
+      # Set up CLI tools & auth
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-
       - id: install-aws-cli
         uses: unfor19/install-aws-cli-action@v1
         with:
             version: 2                         # default
             verbose: false                     # default
             arch: amd64    
-
       - name: Download EKS Kubeconfig
         run: |
           aws eks update-kubeconfig --name showcase --region ${{ secrets.AWS_REGION }}
-    
-  
-
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: 3.12.7
-
       - name: Cache pip
         uses: actions/cache@v3
         with:
@@ -61,25 +55,20 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
       - name: Install Pulumi
         run: |
           curl -fsSL https://get.pulumi.com | sh
           export PATH=$PATH:$HOME/.pulumi/bin
-
-
       - name: Download image URI artifact
         id: download_image
         uses: actions/download-artifact@v4
         with:
           name: image-uri
           path: infra
-      
       - name: Read image URI
         id: read-image-uri
         run: echo "IMAGE_URI=$(cat image-uri.txt)" >> $GITHUB_ENV    
@@ -89,12 +78,14 @@ jobs:
             PULUMI_ACCESS_TOKEN: ${{ secrets.PUL_TOKEN }}
         run: pulumi login
 
+
+      # Deploy the application
       - name: Pulumi stack select
         run: pulumi stack select stage
-
+      # Could be removed
       - name: Pulumi preview
         run: pulumi preview --config backstage_image=${{ env.IMAGE_URI }}
-
       - name: Pulumi up
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: pulumi up --yes --config backstage_image=${{ env.IMAGE_URI }}
         
