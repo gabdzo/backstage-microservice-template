@@ -17,9 +17,9 @@ dependency "vpc" {
   config_path = "${dirname(find_in_parent_folders())}/terragrunt/${local.common_vars.env}/aws/backstage/core/vpc"
 
   mock_outputs = {
-    vpc_id          = "vpc-1234567890abcdef0"
-    public_subnets  = ["asdf", "asdf", "asdf"]
-    private_subnets = ["asdf", "asdf", "asdf"]
+    vpc_id          = "vpc-mock-id-1"
+    public_subnets  = ["s-mock-id-2", "s-mock-id-1", "s-mock-id-3"]
+    private_subnets = ["s-mock-id-2", "s-mock-id-3", "s-mock-id-1"]
   }
 }
 
@@ -53,7 +53,6 @@ inputs = {
 
   vpc_id     = dependency.vpc.outputs.vpc_id
   subnet_ids = dependency.vpc.outputs.private_subnets
-  #   control_plane_subnet_ids = dependency.vpc.outputs.private_subnets
 
   # EKS Managed Node Group(s)
   eks_managed_node_group_defaults = {
@@ -76,51 +75,6 @@ inputs = {
   # Cluster access entry
   # To add the current caller identity as an administrator
   enable_cluster_creator_admin_permissions = true
-
-  # access_entries = {
-  #   # One access entry with a policy associated
-  #   role = {
-  #     kubernetes_groups = ["masters"]
-  #     principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-  #     policy_associations = {
-  #       role = {
-  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-  #         access_scope = {
-  #           namespaces = ["default"]
-  #           type       = "namespace"
-  #         }
-  #       }
-  #     }
-  #   }
-  #   root = {
-  #     kubernetes_groups = ["masters"]
-  #     principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-  #     user_name         = "root"
-  #     policy_associations = {
-  #       role = {
-  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-  #         access_scope = {
-  #           namespaces = ["default"]
-  #           type       = "namespace"
-  #         }
-  #       }
-  #     }
-  #   }
-  #   terraform = {
-  #     kubernetes_groups = ["masters"]
-  #     principal_arn     = "arn:aws:iam::${local.common_vars.account_id}:role/deployment-role"
-  #     user_name         = "terraform"
-  #     policy_associations = {
-  #       role = {
-  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-  #         access_scope = {
-  #           namespaces = ["default"]
-  #           type       = "namespace"
-  #         }
-  #       }
-  #     }
-  #   }
-  # }
 
   tags = local.common_vars.tags
 }

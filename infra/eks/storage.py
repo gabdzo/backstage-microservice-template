@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_kubernetes as k8s
 
+
 class Storage(pulumi.ComponentResource):
     def __init__(
         self,
@@ -10,7 +11,7 @@ class Storage(pulumi.ComponentResource):
         host_path: str = "/mnt/data",  # Local path for PV
         opts: pulumi.ResourceOptions = None,
     ):
-        super().__init__('my:k8s:Storage', name, {}, opts)
+        super().__init__("my:k8s:Storage", name, {}, opts)
 
         # Step 1: Create Persistent Volume (PV)
         self.pv = k8s.core.v1.PersistentVolume(
@@ -48,7 +49,6 @@ class Storage(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
-        self.register_outputs({
-            "pv_name": self.pv.metadata.name,
-            "pvc_name": self.pvc.metadata.name
-        })
+        self.register_outputs(
+            {"pv_name": self.pv.metadata.name, "pvc_name": self.pvc.metadata.name}
+        )
