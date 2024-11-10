@@ -1,192 +1,163 @@
 import pulumi
 import pulumi_kubernetes as k8s
+from pulumi_kubernetes.apps.v1 import Deployment, DeploymentSpecArgs
+from pulumi_kubernetes.core.v1 import (
+    Service, ServiceSpecArgs, Container, ContainerPort,
+    Volume, VolumeMount, EnvVar, EnvVarSource, SecretKeySelector
+)
+from pulumi_kubernetes.meta.v1 import ObjectMeta, LabelSelector
+from pulumi_kubernetes.networking.v1 import Ingress, IngressSpec, IngressRule
+from dataclasses import dataclass
+from typing import Optional, Dict, List
+import re
 
+@dataclass
+class IngressConfig:
+    enabled: bool = False
+    annotations: Optional[Dict[str, str]] = None
+    subnets: str = ""
+    security_groups: str = ""
+    path: str = "/"
+
+@dataclass
+class ServiceConfig:
+    port: int
+    container_port: int
+    type: str = "ClusterIP"
+
+class KubernetesAppError(Exception):
+    """Base exception for KubernetesApp errors."""
+    pass
 
 class KubernetesApp(pulumi.ComponentResource):
+    """
+    KubernetesApp creates a complete Kubernetes application stack including
+    Deployment, Service, and optionally Ingress.
+    
+    Args:
+        name: The name of the application
+        namespace: Kubernetes namespace
+        image: Docker image to deploy
+        service_config: Service configuration
+        ingress_config: Optional ingress configuration
+        replicas: Number of pod replicas
+        secret_name: Name of the Kubernetes secret for environment variables
+        env_vars: Dictionary of environment variables to map from secret
+        pvc_name: Optional PVC name for mounting storage
+    """
     def __init__(
         self,
         name: str,
         namespace: str,
         image: str,
-        container_port: int,
-        service_port: int,
-        replicas: int = 1,
-        secret_name: str = None,  # Kubernetes secret name for environment variables
-        env_vars: dict = None,  # Environment variables to map from secret
-        pvc_name: str = None,  # Optional PVC name for mounting storage
-        service_type: str = "ClusterIP",  # Service type for the app
-        ingress_annotations: dict = None,  # Ingress annotations for ALB ingress
-        ingress_subnets: str = "",  # Subnets for ALB ingress
-        ingress_security_groups: str = "",  # Security groups for ALB ingress
-        ingress_enabled: bool = False,  # Whether to create ingress for the app
-        path: str = "/",  # Ingress path
-        secret_provider_class_name: str = "backstage-secrets",  # SecretProviderClass name
-        opts: pulumi.ResourceOptions = None,
+        service_config: ServiceConfig,
+        ingress_config: Optional[IngressConfig] = None,
+        ...
     ):
+        self._validate_inputs(name, namespace, image)
         super().__init__("my:k8s:KubernetesApp", name, {}, opts)
 
-        # Step 1: Configure volumes if PVC is provided
+        self.labels = {"app": name}
+        self.name = name
+        self.namespace = namespace
+        
+        # Create resources
+        self.deployment = self._create_deployment(image, service_config.container_port, env_vars, secret_name, pvc_name)
+        self.service = self._create_service(service_config.port, service_config.container_port, service_config.type)
+        
+        if ingress_config:
+            self.ingress = self._create_ingress(ingress_config.path, ingress_config.annotations, ingress_config.subnets, ingress_config.security_groups)
+        
+        self.register_outputs({})
+
+    @staticmethod
+    def _validate_inputs(name: str, namespace: str, image: str) -> None:
+        """Validate input parameters."""
+        if not re.match(r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?$', name):
+            raise KubernetesAppError(f"Invalid name format: {name}")
+        
+        if not re.match(r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?$', namespace):
+            raise KubernetesAppError(f"Invalid namespace format: {namespace}")
+        
+        if not image:
+            raise KubernetesAppError("Image cannot be empty")
+
+    def _create_volumes(self, pvc_name: str = None) -> tuple[list, list]:
+        """Create volume and volume mount configurations."""
         volume_mounts = []
         volumes = []
-
-        # Mount the PVC if provided
+        
         if pvc_name:
-            volume_mounts.append(
-                k8s.core.v1.VolumeMountArgs(
-                    name=f"{name}-volume",
-                    mount_path="/mnt/data",
-                )
-            )
-            volumes.append(
-                k8s.core.v1.VolumeArgs(
-                    name=f"{name}-volume",
-                    persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
-                        claim_name=pvc_name,
-                    ),
-                )
-            )
+            volume_mounts.append(VolumeMount(
+                name=f"{self.name}-volume",
+                mount_path="/mnt/data",
+            ))
+            volumes.append(Volume(
+                name=f"{self.name}-volume",
+                persistent_volume_claim={"claimName": pvc_name},
+            ))
+        
+        volumes.append(self._create_csi_volume())
+        return volume_mounts, volumes
 
-        # Step 2: Add the CSI secret store volume
-        # This mounts the secret from the SecretProviderClass (CSI Driver)
-        volumes.append(
-            k8s.core.v1.VolumeArgs(
-                name="secrets-store-inline",
-                csi=k8s.core.v1.CSIVolumeSourceArgs(
-                    driver="secrets-store.csi.k8s.io",
-                    read_only=True,
-                    volume_attributes={
-                        "secretProviderClass": secret_provider_class_name
-                    },
-                ),
-            )
+    def _create_csi_volume(self) -> Volume:
+        """Create CSI secret store volume."""
+        return Volume(
+            name="secrets-store-inline",
+            csi={
+                "driver": "secrets-store.csi.k8s.io",
+                "readOnly": True,
+                "volumeAttributes": {
+                    "secretProviderClass": self.secret_provider_class_name
+                },
+            },
         )
 
-        volume_mounts.append(
-            k8s.core.v1.VolumeMountArgs(
-                name="secrets-store-inline",
-                mount_path="/mnt/secrets-store",  # Adjust the mount path as needed
-                read_only=True,
-            )
-        )
-
-        # Step 3: Add environment variables from the secret if provided
-        env = []
-        if secret_name and env_vars:
-            for env_var, key in env_vars.items():
-                env.append(
-                    k8s.core.v1.EnvVarArgs(
-                        name=env_var,
-                        value_from=k8s.core.v1.EnvVarSourceArgs(
-                            secret_key_ref=k8s.core.v1.SecretKeySelectorArgs(
-                                name=secret_name,
-                                key=key,
-                            )
-                        ),
-                    )
-                )
-
-        # Step 4: Create the Kubernetes Deployment
-        self.deployment = k8s.apps.v1.Deployment(
-            f"{name}-deployment",
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                namespace=namespace,
-                name=name,
-                labels={"app": name},
-            ),
-            spec=k8s.apps.v1.DeploymentSpecArgs(
+    def _create_deployment(self, image: str, container_port: int, ...) -> Deployment:
+        """Create Kubernetes Deployment."""
+        volume_mounts, volumes = self._create_volumes(pvc_name)
+        env = self._create_env_vars(env_vars, secret_name)
+        
+        return Deployment(
+            f"{self.name}-deployment",
+            metadata=self._create_metadata(),
+            spec=DeploymentSpecArgs(
                 replicas=replicas,
-                selector=k8s.meta.v1.LabelSelectorArgs(
-                    match_labels={"app": name},
-                ),
-                template=k8s.core.v1.PodTemplateSpecArgs(
-                    metadata=k8s.meta.v1.ObjectMetaArgs(labels={"app": name}),
-                    spec=k8s.core.v1.PodSpecArgs(
-                        service_account_name="backstage",
-                        containers=[
-                            k8s.core.v1.ContainerArgs(
-                                name=name,
-                                image=image,
-                                ports=[
-                                    k8s.core.v1.ContainerPortArgs(
-                                        container_port=container_port,
-                                    )
-                                ],
-                                env=env,
-                                volume_mounts=volume_mounts,
-                            )
-                        ],
-                        volumes=volumes,
-                    ),
-                ),
+                selector=LabelSelector(match_labels=self.labels),
+                template=self._create_pod_template(image, container_port, env, volume_mounts, volumes),
             ),
-            opts=pulumi.ResourceOptions(
-                parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")
-            ),
+            opts=self._create_resource_options(),
         )
 
-        # Step 5: Create the Kubernetes Service
-        self.service = k8s.core.v1.Service(
-            f"{name}-service",
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                namespace=namespace,
-                name=name,
-            ),
-            spec=k8s.core.v1.ServiceSpecArgs(
-                selector={"app": name},
-                ports=[
-                    k8s.core.v1.ServicePortArgs(
-                        port=service_port,
-                        target_port=container_port,
-                    )
-                ],
-                type=service_type,  # ClusterIP, LoadBalancer, etc.
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")
-            ),
+    def _create_pod_template(self, image: str, container_port: int, env: list, volume_mounts: list, volumes: list) -> dict:
+        """Create pod template configuration."""
+        return {
+            "metadata": {"labels": self.labels},
+            "spec": {
+                "serviceAccountName": "backstage",
+                "containers": [{
+                    "name": self.name,
+                    "image": image,
+                    "ports": [{"containerPort": container_port}],
+                    "env": env,
+                    "volumeMounts": volume_mounts,
+                }],
+                "volumes": volumes,
+            },
+        }
+
+    def _create_metadata(self, suffix: str = "") -> ObjectMeta:
+        """Create metadata for Kubernetes resources."""
+        name = f"{self.name}{suffix}"
+        return ObjectMeta(
+            namespace=self.namespace,
+            name=name,
+            labels=self.labels,
         )
 
-        # Step 6: Optionally create an Ingress
-        if ingress_enabled:
-            ingress_annotations = ingress_annotations or {}
-            ingress_annotations.update(
-                {
-                    "alb.ingress.kubernetes.io/subnets": ingress_subnets,
-                    "alb.ingress.kubernetes.io/security-groups": ingress_security_groups,
-                }
-            )
-            self.ingress = k8s.networking.v1.Ingress(
-                f"{name}-ingress",
-                metadata=k8s.meta.v1.ObjectMetaArgs(
-                    namespace=namespace,
-                    name=f"{name}-ingress",
-                    annotations=ingress_annotations,
-                ),
-                spec=k8s.networking.v1.IngressSpecArgs(
-                    rules=[
-                        k8s.networking.v1.IngressRuleArgs(
-                            http=k8s.networking.v1.HTTPIngressRuleValueArgs(
-                                paths=[
-                                    k8s.networking.v1.HTTPIngressPathArgs(
-                                        path=path,
-                                        path_type="Prefix",
-                                        backend=k8s.networking.v1.IngressBackendArgs(
-                                            service=k8s.networking.v1.IngressServiceBackendArgs(
-                                                name=self.service.metadata.name,
-                                                port=k8s.networking.v1.ServiceBackendPortArgs(
-                                                    number=80,
-                                                ),
-                                            ),
-                                        ),
-                                    )
-                                ]
-                            )
-                        )
-                    ],
-                ),
-                opts=pulumi.ResourceOptions(
-                    parent=self, custom_timeouts=pulumi.CustomTimeouts(create="2m")
-                ),
-            )
-
-        self.register_outputs({})
+    def _create_resource_options(self) -> pulumi.ResourceOptions:
+        """Create standard resource options."""
+        return pulumi.ResourceOptions(
+            parent=self, 
+            custom_timeouts=pulumi.CustomTimeouts(create="2m")
+        )

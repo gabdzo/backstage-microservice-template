@@ -1,6 +1,8 @@
 app:
-  title: Developer Portal
+  title: Trustsoft Backstage
   baseUrl: http://localhost:3000
+  theme:
+    defaultTheme: trustsoft-dark
 
 organization:
   name: Trustsoft
