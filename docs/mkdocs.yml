@@ -1,0 +1,26 @@
+site_name: 'Development Infrastructure Documentation'
+nav:
+  - Home: index.md
+  - Systems:
+    - Development Portal: systems/development-portal.md
+    - Internal Tools: systems/internal-tools.md
+  - Components:
+    - Frontend: components/backstage-frontend.md
+    - Backend: components/backstage-backend.md
+  - APIs:
+    - Frontend API: apis/frontend-api.md
+    - Backend API: apis/backend-api.md
+  - Resources:
+    - PostgreSQL: resources/postgres-db.md
+    - Redis Cache: resources/redis-cache.md
+  - Teams:
+    - Platform Team: teams/team-platform.md
+    - DevOps Team: teams/team-devops.md
+
+plugins:
+  - techdocs-core
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
