@@ -34,25 +34,28 @@ import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
 
-import { SignInProviderConfig, SignInPage } from '@backstage/core-components';
-import { githubAuthApiRef } from '@backstage/core-plugin-api';
-
-const gitHubProvider: SignInProviderConfig = {
-  id: 'github-auth-provider',
-  title: 'GitHub',
-  message: 'Sign in using GitHub',
-  apiRef: githubAuthApiRef,
-};
-
-const providers: SignInProviderConfig[] | any = ['guest', gitHubProvider];
+// import { SignInProviderConfig } from '@backstage/core-components';
+// import { githubAuthApiRef } from '@backstage/core-plugin-api';
+import { UnifiedThemeProvider } from '@backstage/theme';
+import { trustsoftTheme } from './themes/TrustsoftTheme';
+import LightIcon from '@material-ui/icons/WbSunny';
+import DarkIcon from '@material-ui/icons/Brightness2';
 
 const app = createApp({
   apis,
-  components: {
-    SignInPage: (props: any) => (
-      <SignInPage {...props} auto providers={providers} />
-    ),
-  },
+  themes: [
+    {
+      id: 'trustsoft-light',
+      title: 'Trustsoft Light',
+      variant: 'dark',
+      icon: <LightIcon />,
+      Provider: ({ children }) => (
+        <UnifiedThemeProvider theme={trustsoftTheme}>
+          {children}
+        </UnifiedThemeProvider>
+      ),
+    }
+  ],
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
