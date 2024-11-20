@@ -3,11 +3,11 @@ kind: Component
 metadata:
   name: trust-backstage
   description: An example of a Backstage application.
-  # Example for optional annotations
-  # annotations:
-  #   github.com/project-slug: backstage/backstage
-  #   backstage.io/techdocs-ref: dir:.
+  annotations:
+    github.com/project-slug: backstage/backstage
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/adr-location: ../docs/adrs/
 spec:
   type: website
-  owner: john@example.com
+  owner: team-platform
   lifecycle: experimental
