@@ -2,6 +2,11 @@
 parent: Architectural Decisions
 nav_order: 1
 ---
+* Status: accepted
+* Deciders: Platform Engineering Team
+* Date: 2024-03-20
+* Technical Story: Need for a centralized developer portal platform
+
 # Use Backstage as Developer Portal
 
 ## Context and Problem Statement

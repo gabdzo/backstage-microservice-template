@@ -2,6 +2,11 @@
 parent: Architectural Decisions
 nav_order: 3
 ---
+* Status: accepted
+* Deciders: Platform Engineering Team
+* Date: 2024-03-20
+* Technical Story: Need for a centralized developer portal platform
+
 # Use TechDocs with MkDocs
 
 ## Context and Problem Statement

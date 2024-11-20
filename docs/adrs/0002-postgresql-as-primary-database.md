@@ -2,6 +2,11 @@
 parent: Architectural Decisions
 nav_order: 2
 ---
+* Status: accepted
+* Deciders: Platform Engineering Team
+* Date: 2024-03-20
+* Technical Story: Need for a centralized developer portal platform
+
 # Use PostgreSQL as Primary Database
 
 ## Context and Problem Statement

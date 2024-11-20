@@ -2,6 +2,11 @@
 parent: Architectural Decisions
 nav_order: 5
 ---
+* Status: proposed
+* Deciders: Platform Engineering Team
+* Date: 2024-03-20
+* Technical Story: Need for a centralized developer portal platform
+
 # Use Multi-provider OAuth2 for Authentication
 
 ## Context and Problem Statement
