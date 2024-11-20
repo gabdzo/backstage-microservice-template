@@ -1,34 +1,88 @@
 # 4. Kubernetes Deployment Strategy
 
-Date: 2024-03-20
+* Status: accepted
+* Deciders: Platform Engineering Team, DevOps Team
+* Date: 2024-03-20
+* Technical Story: Need for a scalable and manageable deployment strategy
 
-## Status
-Accepted
+## Context and Problem Statement
 
-## Context
-We needed a deployment strategy that would:
-- Scale effectively
-- Support multiple environments
-- Enable easy updates
-- Provide monitoring capabilities
+How should we deploy and manage our Backstage instance in production? We need a solution that provides scalability, reliability, and ease of management.
 
-## Decision
-We decided to deploy Backstage on Kubernetes because:
-- Container orchestration capabilities
-- Native scaling support
-- Rolling update support
-- Health check mechanisms
-- Resource management
+## Decision Drivers
 
-## Consequences
-### Positive
-- Consistent deployments
-- Easy scaling
-- Built-in monitoring
-- Resource isolation
+* Scalability requirements
+* Operational complexity
+* Resource utilization
+* Monitoring capabilities
+* Deployment automation
+* High availability needs
 
-### Negative
-- Kubernetes complexity
-- Resource overhead
-- Need for K8s expertise
-- Additional operational costs
+## Considered Options
+
+* Kubernetes deployment
+* VM-based deployment
+* Serverless deployment
+* Managed PaaS solution
+
+## Decision Outcome
+
+Chosen option: "Kubernetes deployment", because it provides the best balance of scalability, manageability, and ecosystem integration.
+
+### Positive Consequences
+
+* Container orchestration capabilities
+* Automated scaling and failover
+* Resource optimization
+* Built-in monitoring
+* Rolling updates support
+* Service discovery
+
+### Negative Consequences
+
+* Kubernetes complexity
+* Higher operational overhead
+* Resource requirements
+* Need for K8s expertise
+* Additional infrastructure costs
+
+## Pros and Cons of the Options
+
+### Kubernetes Deployment
+
+* Good, because it provides container orchestration
+* Good, because it supports auto-scaling
+* Good, because it has built-in monitoring
+* Good, because it enables rolling updates
+* Bad, because it adds operational complexity
+* Bad, because it requires specialized knowledge
+
+### VM-based Deployment
+
+* Good, because it's simpler to understand
+* Good, because it's traditional and proven
+* Bad, because it lacks container benefits
+* Bad, because manual scaling is required
+* Bad, because resource utilization is lower
+
+### Serverless Deployment
+
+* Good, because it reduces operational overhead
+* Good, because it has automatic scaling
+* Bad, because it has cold start issues
+* Bad, because it has limited runtime control
+* Bad, because it can be more expensive
+
+### Managed PaaS Solution
+
+* Good, because it reduces management overhead
+* Good, because it provides built-in features
+* Bad, because it's less flexible
+* Bad, because it can be expensive
+* Bad, because it may have vendor lock-in
+
+## Links
+
+* [Kubernetes Documentation](https://kubernetes.io/docs/)
+* [Backstage K8s Deployment Guide](https://backstage.io/docs/deployment/k8s)
+* [ADR-0002](0002-postgresql-as-primary-database.md) - Related database decisions
