@@ -1,21 +1,13 @@
-# 1. Use Backstage as Developer Portal
-
-* Status: accepted
-* Deciders: Platform Engineering Team
-* Date: 2024-03-20
-* Technical Story: Need for a centralized developer portal platform
+---
+parent: Architectural Decisions
+nav_order: 1
+---
+# Use Backstage as Developer Portal
 
 ## Context and Problem Statement
 
-How can we provide a unified developer experience with service catalog, documentation, and tooling integration capabilities? We need a solution that supports our microservices architecture and enables efficient developer workflows.
-
-## Decision Drivers
-
-* Need for centralized service catalog
-* Documentation-as-code requirements
-* Tool integration capabilities
-* Developer experience
-* Extensibility and customization options
+How can we provide a unified developer experience with service catalog, documentation, and tooling integration capabilities?
+How can we ensure efficient developer workflows in our microservices architecture?
 
 ## Considered Options
 
@@ -27,20 +19,17 @@ How can we provide a unified developer experience with service catalog, document
 
 Chosen option: "Backstage", because it provides the best balance of features, extensibility, and community support.
 
-### Positive Consequences
+### Consequences
 
-* Unified developer experience through a single platform
-* Rich plugin ecosystem for tool integration
-* Documentation-as-code with TechDocs
-* Service catalog with automatic discovery
-* Template-based service scaffolding
-
-### Negative Consequences
-
-* Learning curve for development team
-* Infrastructure maintenance overhead
-* Need for custom plugin development
-* Resource requirements for hosting
+* Good, because it provides unified developer experience through a single platform
+* Good, because it offers rich plugin ecosystem for tool integration
+* Good, because it supports documentation-as-code with TechDocs
+* Good, because it enables service catalog with automatic discovery
+* Good, because it provides template-based service scaffolding
+* Bad, because it has learning curve for development team
+* Bad, because it requires infrastructure maintenance overhead
+* Bad, because it needs custom plugin development
+* Bad, because it has resource requirements for hosting
 
 ## Pros and Cons of the Options
 
@@ -69,7 +58,7 @@ Chosen option: "Backstage", because it provides the best balance of features, ex
 * Bad, because they have limited customization options
 * Bad, because they might lock us into their ecosystem
 
-## Links
+## More Information
 
 * [Backstage Documentation](https://backstage.io/docs)
 * [ADR-0003](0003-techdocs-with-mkdocs.md) - Related decision about documentation

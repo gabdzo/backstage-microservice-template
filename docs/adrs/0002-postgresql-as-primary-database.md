@@ -1,22 +1,13 @@
-# 2. PostgreSQL as Primary Database
-
-* Status: accepted
-* Deciders: Platform Engineering Team, DevOps Team
-* Date: 2024-03-20
-* Technical Story: Need for a reliable database solution for Backstage
+---
+parent: Architectural Decisions
+nav_order: 2
+---
+# Use PostgreSQL as Primary Database
 
 ## Context and Problem Statement
 
-What database solution should we use for storing Backstage's catalog information, user data, plugin data, and search indices? We need a solution that provides reliability, performance, and good integration with Backstage.
-
-## Decision Drivers
-
-* Data consistency requirements
-* Search capabilities
-* Integration with Backstage
-* Team expertise
-* Operational overhead
-* Scalability needs
+What database solution should we use for storing Backstage's catalog information, user data, plugin data, and search indices?
+How can we ensure reliable performance and good integration with Backstage?
 
 ## Considered Options
 
@@ -29,20 +20,17 @@ What database solution should we use for storing Backstage's catalog information
 
 Chosen option: "PostgreSQL", because it provides the best combination of native Backstage support, reliability, and team expertise.
 
-### Positive Consequences
+### Consequences
 
-* Native support in Backstage ecosystem
-* Built-in full-text search capabilities
-* Strong data consistency guarantees
-* Familiar to the team
-* Rich ecosystem of tools
-
-### Negative Consequences
-
-* Requires dedicated database management
-* Need for connection pooling setup
-* Storage costs for large deployments
-* Regular maintenance required
+* Good, because it has native support in Backstage ecosystem
+* Good, because it provides built-in full-text search capabilities
+* Good, because it ensures strong data consistency guarantees
+* Good, because it's familiar to the team
+* Good, because it has rich ecosystem of tools
+* Bad, because it requires dedicated database management
+* Bad, because it needs connection pooling setup
+* Bad, because it has storage costs for large deployments
+* Bad, because it requires regular maintenance
 
 ## Pros and Cons of the Options
 
@@ -79,7 +67,7 @@ Chosen option: "PostgreSQL", because it provides the best combination of native 
 * Bad, because it has eventual consistency
 * Bad, because team lacks NoSQL expertise
 
-## Links
+## More Information
 
 * [Backstage Database Documentation](https://backstage.io/docs/tutorials/database-management)
 * [PostgreSQL Documentation](https://www.postgresql.org/docs/)

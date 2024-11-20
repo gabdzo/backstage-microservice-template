@@ -1,21 +1,13 @@
-# 3. TechDocs with MkDocs
-
-* Status: accepted
-* Deciders: Platform Engineering Team
-* Date: 2024-03-20
-* Technical Story: Need for a documentation solution that integrates with code
+---
+parent: Architectural Decisions
+nav_order: 3
+---
+# Use TechDocs with MkDocs
 
 ## Context and Problem Statement
 
-How can we provide a documentation solution that supports version control, is easy to maintain, and integrates well with our development workflow? We need a solution that developers will actually use and maintain.
-
-## Decision Drivers
-
-* Documentation-as-code requirements
-* Integration with Backstage
-* Developer experience
-* Maintenance overhead
-* Rendering capabilities
+How can we provide a documentation solution that supports version control, is easy to maintain, and integrates well with our development workflow?
+How can we ensure developers will actually write and maintain documentation?
 
 ## Considered Options
 
@@ -28,20 +20,17 @@ How can we provide a documentation solution that supports version control, is ea
 
 Chosen option: "TechDocs with MkDocs", because it provides native Backstage integration and supports documentation-as-code workflow.
 
-### Positive Consequences
+### Consequences
 
-* Documentation lives with code
-* Version controlled documentation
-* Markdown-based writing
-* Rich formatting and extensions
-* Native Backstage integration
-
-### Negative Consequences
-
-* Additional build step in CI/CD
-* Storage needed for generated docs
-* Learning curve for advanced features
-* Maintenance of documentation pipeline
+* Good, because documentation lives with code
+* Good, because documentation is version controlled
+* Good, because it uses Markdown for writing
+* Good, because it provides rich formatting options
+* Good, because it has native Backstage integration
+* Bad, because it requires additional build step in CI/CD
+* Bad, because it needs storage for generated docs
+* Bad, because it has learning curve for advanced features
+* Bad, because it requires documentation pipeline maintenance
 
 ## Pros and Cons of the Options
 
@@ -78,7 +67,7 @@ Chosen option: "TechDocs with MkDocs", because it provides native Backstage inte
 * Bad, because it needs ongoing maintenance
 * Bad, because it lacks community support
 
-## Links
+## More Information
 
 * [TechDocs Documentation](https://backstage.io/docs/features/techdocs/techdocs-overview)
 * [MkDocs Documentation](https://www.mkdocs.org/)

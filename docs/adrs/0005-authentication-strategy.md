@@ -1,22 +1,13 @@
-# 5. Authentication Strategy
-
-* Status: accepted
-* Deciders: Platform Engineering Team, Security Team
-* Date: 2024-03-20
-* Technical Story: Need for secure and flexible authentication solution
+---
+parent: Architectural Decisions
+nav_order: 5
+---
+# Use Multi-provider OAuth2 for Authentication
 
 ## Context and Problem Statement
 
-How should we implement authentication in our Backstage deployment? We need a solution that is secure, supports multiple providers, and integrates with existing systems.
-
-## Decision Drivers
-
-* Security requirements
-* Integration capabilities
-* User experience
-* Maintenance overhead
-* Compliance needs
-* Flexibility requirements
+How should we implement authentication in our Backstage deployment?
+How can we ensure secure access while supporting multiple authentication providers?
 
 ## Considered Options
 

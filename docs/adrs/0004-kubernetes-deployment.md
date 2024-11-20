@@ -1,22 +1,13 @@
-# 4. Kubernetes Deployment Strategy
-
-* Status: accepted
-* Deciders: Platform Engineering Team, DevOps Team
-* Date: 2024-03-20
-* Technical Story: Need for a scalable and manageable deployment strategy
+---
+parent: Architectural Decisions
+nav_order: 4
+---
+# Use Kubernetes for Deployment
 
 ## Context and Problem Statement
 
-How should we deploy and manage our Backstage instance in production? We need a solution that provides scalability, reliability, and ease of management.
-
-## Decision Drivers
-
-* Scalability requirements
-* Operational complexity
-* Resource utilization
-* Monitoring capabilities
-* Deployment automation
-* High availability needs
+How should we deploy and manage our Backstage instance in production?
+How can we ensure scalability, reliability, and ease of management?
 
 ## Considered Options
 
