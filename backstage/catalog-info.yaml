@@ -4,7 +4,7 @@ metadata:
   name: trust-backstage
   description: An example of a Backstage application.
   annotations:
-    github.com/project-slug: backstage/backstage
+    github.com/project-slug: gabdzo/backstage-microservice-template
     backstage.io/techdocs-ref: dir:.
     backstage.io/adr-location: ../docs/adrs/
 spec:
